@@ -1,11 +1,27 @@
 import { Button, Stack, TextField, Typography } from "@mui/material";
+import { useRef, useCallback } from "react";
 
 export default function Home() {
+  
+  const blurbRef = useRef("");
 
-  function generateBlurb(): void {
-    throw new Error("Function not implemented.");
+  const generateBlurb = useCallback(async () => {
+    const response = await fetch("/api/generateBlurb", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: blurbRef.current,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const data = await response.json();
+    console.log("Response was:", JSON.stringify(data));
   }
-
+    , [blurbRef.current]);
 
   return (
     <Stack
@@ -29,6 +45,9 @@ export default function Home() {
        multiline
        fullWidth
        minRows={4}
+       onChange={(e) => {
+         blurbRef.current = e.target.value;
+       }}
        sx={{ "& textarea": { boxShadow: "none !important" } }}
        placeholder="Key words on what you would like your blurb to be about"
      ></TextField>
