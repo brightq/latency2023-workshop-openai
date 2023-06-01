@@ -6,6 +6,7 @@ export default function Home() {
 
   const blurbRef = useRef("");
   const [generatingPosts, setGeneratingPosts] = useState("");
+  const [blurbsFinishedGenerating, setBlurbsFinishedGenerating] = useState<boolean>(false);
 
   const prompt = `Generate 3 tweets and clearly labeled "1." , "2." and "3.". 
                   Follow the following criteria:
@@ -15,6 +16,7 @@ export default function Home() {
 
 
   const generateBlurb = useCallback(async () => {
+    setBlurbsFinishedGenerating(false);
     let done = false;
     let firstPost = false;
     let streamedText = "";
@@ -49,6 +51,7 @@ export default function Home() {
         firstPost = streamedText.includes("1.");
       }
     }
+    setBlurbsFinishedGenerating(true);
   }
     , [blurbRef.current]);
 
@@ -95,7 +98,11 @@ export default function Home() {
             .split(/2\.|3\./)
             .map((generatingPost, index) => {
               return (
-                <Blurb key={index} generatingPost={generatingPost}></Blurb>
+                <Blurb
+                  key={index}
+                  generatingPost={generatingPost}
+                  blurbsFinishedGenerating={blurbsFinishedGenerating}
+                ></Blurb>
               );
             })}
         </>
