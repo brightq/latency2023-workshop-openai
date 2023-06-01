@@ -1,10 +1,11 @@
 import { Card, CardContent, Stack, Box } from "@mui/material";
 import Plagiarism from "./plagiarism";
 import { useState, useEffect } from "react";
-import dummyScanResults from "../../utils/dummy-data/dummyScanResults.json";
+import dummyScanResults from "@/utils/dummy-data/dummyScanResults.json";
 import dummyCompletedExportResultsWebhookResponse from "@/utils/dummy-data/dummyCompletedExportResultsWebhookResponse.json";
 import dummyCompletedScanWebhookResponse from "@/utils/dummy-data/dummyCompletedScanWebhookResponse.json";
-
+import { FirebaseWrapper } from "../../lib/firebase/firebaseWrapper";
+import { onValue } from "firebase/database";
 
 interface Props {
   generatingPost: string;
@@ -18,7 +19,8 @@ export default function Blurb({ generatingPost, blurbsFinishedGenerating }: Prop
 
   const checkPlagiarism = async (streamedBlurb: string) => {
     setPlagiarismLoading(true);
-    const scan = dummyScanResults;
+
+    const scanId = "f1d0db14-c4d2-487d-9615-5a1b8ef6f4c2";
     const completedScanWebhookResponse = await fetch(
       "/api/copy-leaks/completed/f1d0db14-c4d2-487d-9615-5a1b8ef6f4c2",
       {
@@ -40,22 +42,35 @@ export default function Blurb({ generatingPost, blurbsFinishedGenerating }: Prop
         body: JSON.stringify(dummyCompletedExportResultsWebhookResponse),
       }
     );
-    handleScan(streamedBlurb, scan);
-    setPlagiarismLoading(false);
+
+    const firebase = new FirebaseWrapper();
+    const scanRef = firebase.getScanReference(scanId);
+    onValue(scanRef, async (scanRecord: any) => {
+      // Only continue if a <scanId> node is present in Firebase
+      if (scanRecord.exists()) {
+        const scan = scanRecord.val();
+        handleScan(streamedBlurb, scan);
+      }
+    });
   };
 
-  function handleScan(text: string, scan: any) {
+  function handleScan(text: string, scan) {
     const totalBlurbWords = text.split(" ").length;
     const matchedWords = scan.matchedWords;
     setPlagiarisedScore((matchedWords / totalBlurbWords) * 100);
-    const characterStarts = scan.results.identical.source.chars.starts;
-    const characterLengths = scan.results.identical.source.chars.lengths;
-    const highlightedHTMLBlurb = getHighlightedHTMLBlurb(
-      text,
-      characterStarts,
-      characterLengths
-    );
-    setHighlightedHTMLBlurb(highlightedHTMLBlurb);
+    if (matchedWords == 0) {
+      setPlagiarismLoading(false);
+    } else if (scan.results) {
+      const characterStarts = scan.results.identical.source.chars.starts;
+      const characterLengths = scan.results.identical.source.chars.lengths;
+      const highlightedHTMLBlurb = getHighlightedHTMLBlurb(
+        text,
+        characterStarts,
+        characterLengths
+      );
+      setHighlightedHTMLBlurb(highlightedHTMLBlurb);
+      setPlagiarismLoading(false);
+    }
   }
 
   function getHighlightedHTMLBlurb(
