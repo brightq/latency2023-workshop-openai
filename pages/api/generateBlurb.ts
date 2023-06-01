@@ -1,35 +1,40 @@
-import { NextApiRequest, NextApiResponse } from "next";
+// import { NextApiRequest, NextApiResponse } from "next";
+import { OpenAIStream, OpenAIStreamPayload } from "../../utils/openAIStream";
+
+export const config = {
+    runtime: "edge",
+};
 
 if (!process.env.OPENAI_API_KEY) {
-  throw new Error("Missing env var from OpenAI");
+    throw new Error("Missing env var from OpenAI");
 }
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { prompt } = req.body;
+// const handler = async (req: NextApiRequest): Promise<Response> => {
+//   const { prompt } = req.body;
 
-  const payload = {
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.7,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    max_tokens: 200,
-    n: 1,
-  };
+const handler = async (req: Request): Promise<Response> => {
+    const { prompt } = (await req.json()) as {
+        prompt?: string;
+    };
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY ?? ""}`,
-    },
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+    if (!prompt) {
+        return new Response("No prompt in the request", { status: 400 });
+    }
 
-  const data = await response.json();
-  res.status(200);
-  res.send(data);
+    const payload: OpenAIStreamPayload = {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 1,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        max_tokens: 200,
+        stream: true,
+        n: 1,
+    };
+
+    const stream = await OpenAIStream(payload);
+    return new Response(stream);
 };
 
 export default handler;
