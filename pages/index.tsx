@@ -1,5 +1,6 @@
 import { Typography, Stack, TextField, Button, Card, CardContent } from "@mui/material";
 import { useRef, useCallback, useState } from "react";
+import Blurb from "../components/blurb";
 
 export default function Home() {
 
@@ -87,11 +88,7 @@ export default function Home() {
           .substring(generatingPosts.indexOf("1.") + 3)
           .split(/2\.|3\./)
           .map((generatingPost, index) => {
-            return (
-              <Card key={index}>
-                <CardContent>{generatingPost}</CardContent>
-              </Card>
-            );
+            return <Blurb key={index} generatingPost={generatingPost} />;
           })}
     </Stack>
   );
