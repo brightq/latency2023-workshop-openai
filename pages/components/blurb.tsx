@@ -2,6 +2,8 @@ import { Card, CardContent, Stack, Box } from "@mui/material";
 import Plagiarism from "./plagiarism";
 import { useState, useEffect } from "react";
 import dummyScanResults from "../../utils/dummy-data/dummyScanResults.json";
+import dummyCompletedExportResultsWebhookResponse from "@/utils/dummy-data/dummyCompletedExportResultsWebhookResponse.json";
+import dummyCompletedScanWebhookResponse from "@/utils/dummy-data/dummyCompletedScanWebhookResponse.json";
 
 
 interface Props {
@@ -16,8 +18,28 @@ export default function Blurb({ generatingPost, blurbsFinishedGenerating }: Prop
 
   const checkPlagiarism = async (streamedBlurb: string) => {
     setPlagiarismLoading(true);
-    // await new Promise((r) => setTimeout(r, 500));
     const scan = dummyScanResults;
+    const completedScanWebhookResponse = await fetch(
+      "/api/copy-leaks/completed/f1d0db14-c4d2-487d-9615-5a1b8ef6f4c2",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dummyCompletedScanWebhookResponse),
+      }
+    );
+
+    const completedExportResultsWebhookResponse = await fetch(
+      "/api/copy-leaks/export/f1d0db14-c4d2-487d-9615-5a1b8ef6f4c2/7e514eabb3",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dummyCompletedExportResultsWebhookResponse),
+      }
+    );
     handleScan(streamedBlurb, scan);
     setPlagiarismLoading(false);
   };
