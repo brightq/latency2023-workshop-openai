@@ -83,13 +83,23 @@ export default function Home() {
 
       <Button onClick={generateBlurb}>Generate Blurb</Button>
 
-      {generatingPosts &&
-        generatingPosts
-          .substring(generatingPosts.indexOf("1.") + 3)
-          .split(/2\.|3\./)
-          .map((generatingPost, index) => {
-            return <Blurb key={index} generatingPost={generatingPost} />;
-          })}
+      {generatingPosts && (
+        <>
+          <Stack direction="row-reverse" width="100%">
+            <Typography width="12em" textAlign="center">
+              Plagiarism Score
+            </Typography>
+          </Stack>
+          {generatingPosts
+            .substring(generatingPosts.indexOf("1.") + 3)
+            .split(/2\.|3\./)
+            .map((generatingPost, index) => {
+              return (
+                <Blurb key={index} generatingPost={generatingPost}></Blurb>
+              );
+            })}
+        </>
+      )}
     </Stack>
   );
 }
