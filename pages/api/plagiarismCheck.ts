@@ -16,3 +16,4 @@ export default async function handler(req: NextRequest) {
   const scanId = await copyLeaks.scan(body.text);
   return NextResponse.json({ scanId });
 }
+

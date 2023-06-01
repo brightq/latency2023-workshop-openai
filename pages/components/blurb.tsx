@@ -48,7 +48,7 @@ export default function Blurb({ generatingPost, blurbsFinishedGenerating }: Prop
     setPlagiarismLoading(false);
   };
 
-  function handleScan(text: string, scan) {
+  function handleScan(text: string, scan: any) {
     const totalBlurbWords = text.split(" ").length;
     const matchedWords = scan.matchedWords;
     setPlagiarisedScore((matchedWords / totalBlurbWords) * 100);
