@@ -1,6 +1,6 @@
 import { Typography, Stack, TextField, Button, Card, CardContent } from "@mui/material";
 import { useRef, useCallback, useState } from "react";
-import Blurb from "../components/blurb";
+import Blurb from "./components/blurb";
 
 export default function Home() {
 
